@@ -22,51 +22,35 @@ SOFTWARE.
 
 See more at http://blog.squix.ch
 */
-
 #pragma once
 
-#include <JsonListener.h>
-#include <JsonStreamingParser.h>
-#include <ESP8266WiFi.h>
-#include <WiFiClient.h>
+#include <ESPWiFi.h>
 
-#define MAX_FORECAST_PERIODS 7
+#define NTP_PACKET_SIZE 48
 
-class ThingspeakClient: public JsonListener {
+class TimeClient {
+
   private:
-    // Thingspeak has a maximum of 8 fields
-    String lastFields[8];
-    String fieldLabels[8];
-    String createdAt;
-    boolean isHeader = true;
-    String currentKey = "";
+    float myUtcOffset = 0;
+    long localEpoc = 0;
+    long localMillisAtUpdate;
+    
+    const char* ntpServerName = "time.nist.gov";
+    unsigned int localPort = 2390;
+    
+    byte packetBuffer[ NTP_PACKET_SIZE]; //buffer to hold incoming and outgoing packets
+
     
   public:
-    ThingspeakClient();
-    
-    void getLastChannelItem(String channelId, String readApiKey);
+    TimeClient(float utcOffset);
+    void updateTime();
 
-    String getFieldLabel(int index);
+    String getHours();
+    String getMinutes();
+    String getSeconds();
+    String getFormattedTime();
+    long getCurrentEpoch();
+    long getCurrentEpochWithUtcOffset();
 
-    String getFieldValue(int index);
-
-    String getCreatedAt();
-    
-    virtual void whitespace(char c);
-  
-    virtual void startDocument();
-
-    virtual void key(String key);
-
-    virtual void value(String value);
-
-    virtual void endArray();
-
-    virtual void endObject();
-
-    virtual void endDocument();
-
-    virtual void startArray();
-
-    virtual void startObject();
 };
+
